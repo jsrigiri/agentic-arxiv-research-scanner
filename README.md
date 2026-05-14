@@ -1,6 +1,28 @@
-# Agentic arXiv Research Scanner
+<div align="center">
 
-An end-to-end agentic AI system that scans arXiv for recent AI/ML and quant finance papers, scores relevance, generates LLM summaries, stores results in SQLite, orchestrates workflows using LangGraph, indexes papers into ChromaDB, supports RAG research QA, ingests full-paper PDFs, and visualizes results through a Streamlit dashboard.
+# 🚀 Agentic arXiv Research Scanner
+
+### Agentic AI Research Intelligence System for AI/ML + Quant Finance Papers
+
+<p>
+  <img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python" />
+  <img src="https://img.shields.io/badge/LangGraph-Agentic_AI-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Ollama-Local_LLM-black?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/ChromaDB-Vector_DB-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Streamlit-Dashboard-red?style=for-the-badge&logo=streamlit" />
+</p>
+
+<p>
+  <b>Scan arXiv → Score Relevance → Summarize Papers → Ingest PDFs → Build RAG Index → Ask Research Questions → Analyze Trends</b>
+</p>
+
+</div>
+
+---
+
+## Project Overview
+
+An end-to-end **agentic AI system** that scans arXiv for recent **AI/ML** and **quant finance** papers, scores relevance, generates LLM summaries, stores results in SQLite, orchestrates workflows using LangGraph, indexes papers into ChromaDB, supports RAG research QA, ingests full-paper PDFs, detects research trends, and visualizes results through a Streamlit dashboard.
 
 ---
 
@@ -20,6 +42,9 @@ An end-to-end agentic AI system that scans arXiv for recent AI/ML and quant fina
 - Local embeddings with SentenceTransformers
 - PDF download and full-text extraction
 - Chunked full-paper indexing
+- Research trend analytics
+- TF-IDF term extraction
+- Keyword frequency analysis
 - Workflow observability and timing metrics
 - Pytest unit tests
 - GitHub Actions CI
@@ -45,7 +70,10 @@ SQLite Storage + ChromaDB Indexing
     ↓
 Markdown Report Generator
     ↓
-Streamlit Dashboard + RAG QA
+Streamlit Dashboard
+    ├── Paper Dashboard
+    ├── RAG Research QA
+    └── Trend Analytics
 ```
 
 ---
@@ -68,14 +96,17 @@ Streamlit Dashboard + RAG QA
 - SentenceTransformers
 - ChromaDB
 
-### Data / Parsing
+### Data / Parsing / Analytics
 
 - arxiv Python SDK
 - pandas
 - plotly
+- scikit-learn
 - PyMuPDF
 - requests
 - tqdm
+- matplotlib
+- wordcloud
 
 ---
 
@@ -94,7 +125,8 @@ agentic-arxiv-research-scanner/
 │   │   ├── storage.py
 │   │   ├── vector_store.py
 │   │   ├── pdf_ingestor.py
-│   │   └── text_chunker.py
+│   │   ├── text_chunker.py
+│   │   └── trend_analysis.py
 │   │
 │   ├── workflows/
 │   │   ├── research_graph.py
@@ -186,14 +218,6 @@ Recommended laptop-safe model:
 
 ```text
 llama3.2:1b
-```
-
-Avoid large models on limited RAM laptops:
-
-```text
-llama3.1:8b
-deepseek-r1:8b
-mixtral
 ```
 
 ---
@@ -311,6 +335,14 @@ If arXiv blocks requests, wait before retrying.
 streamlit run app/dashboard/streamlit_app.py
 ```
 
+Dashboard tabs:
+
+```text
+Paper Dashboard
+RAG Research QA
+Trend Analytics
+```
+
 Dashboard includes:
 
 - Paper browser
@@ -320,7 +352,64 @@ Dashboard includes:
 - Workflow analytics charts
 - RAG research QA tab
 - Retrieved paper chunk display
+- Trend analytics tab
+- TF-IDF research term charts
+- Matched keyword frequency charts
 - Direct arXiv links
+
+---
+
+## RAG Research QA
+
+The dashboard supports questions such as:
+
+```text
+Which papers are most relevant to quant trading strategies?
+What are the major trends in agentic AI?
+What implementation ideas can I get from these papers?
+Which retrieved chunks support the answer?
+```
+
+The RAG system:
+
+```text
+User Question
+    ↓
+SentenceTransformer Embedding
+    ↓
+ChromaDB Semantic Search
+    ↓
+Top Paper Chunks
+    ↓
+Ollama Answer Generator
+    ↓
+Grounded Research Answer
+```
+
+---
+
+## Trend Analytics
+
+The project includes a Streamlit **Trend Analytics** tab powered by:
+
+- TF-IDF
+- n-gram extraction
+- matched keyword frequency
+- Plotly visualizations
+
+Trend module:
+
+```text
+app/data/trend_analysis.py
+```
+
+Analytics include:
+
+```text
+Top TF-IDF Research Terms
+Top Matched Keywords
+Research Theme Charts
+```
 
 ---
 
@@ -328,14 +417,6 @@ Dashboard includes:
 
 ```bash
 python rag_query.py
-```
-
-Example questions:
-
-```text
-Which papers are most relevant to quant trading strategies?
-What are the major trends in agentic AI?
-What implementation ideas can I get from these papers?
 ```
 
 ---
@@ -380,6 +461,7 @@ Workflow file:
 - ChromaDB indexing
 - Dashboard analytics
 - RAG retrieval visibility
+- Trend analytics visualization
 
 ---
 
@@ -393,6 +475,7 @@ This project demonstrates:
 - RAG over research papers
 - Full-paper PDF ingestion
 - Chunked vector search
+- Research trend detection
 - Local-first GenAI development
 - Production-style fallback handling
 - AI workflow observability
@@ -409,7 +492,7 @@ Potential future upgrades:
 
 - Better page-level citations
 - Paper clustering by topic
-- Research trend detection
+- Research trend detection over time
 - Novelty scoring
 - Email/Slack digest
 - Scheduled daily ingestion
@@ -423,543 +506,145 @@ Potential future upgrades:
 
 # Project Build Steps
 
-This section documents the step-by-step build process used to create the project.
-
 ## Step 1: Define Project Scope and MVP
 
-Selected project direction:
-
-```text
-Agentic arXiv Research Scanner for both AI/ML and quant finance papers.
-```
-
-Initial goal:
-
-```text
-Scan arXiv, score relevance, summarize papers, store results, and generate research briefs.
-```
-
-Initial categories:
-
-```text
-cs.AI
-cs.LG
-cs.CL
-q-fin.TR
-q-fin.ST
-```
-
----
+Built an agentic arXiv research scanner for both AI/ML and quant finance papers.
 
 ## Step 2: Create GitHub-Ready Folder Structure
 
-Created folders:
-
-```text
-app/
-app/agents/
-app/data/
-app/workflows/
-app/dashboard/
-reports/
-tests/
-```
-
-Created base files:
-
-```text
-main.py
-config.yaml
-requirements.txt
-README.md
-.gitignore
-```
-
----
+Created the main project folders under `app/`, `reports/`, and `tests/`.
 
 ## Step 3: Add Dependencies and Config Files
 
-Added initial dependencies:
-
-```text
-arxiv
-pandas
-pyyaml
-requests
-python-dotenv
-pytest
-rich
-```
-
-Added project configuration in `config.yaml`.
-
-Added `.gitignore`.
-
----
+Added initial Python dependencies, `.gitignore`, and `config.yaml`.
 
 ## Step 4: Add arXiv Paper Collector
 
-Created:
-
-```text
-app/data/arxiv_client.py
-```
-
-Implemented:
-
-- category query builder
-- recent paper fetcher
-- title, authors, abstract, date, URL, PDF URL extraction
-
----
+Created `app/data/arxiv_client.py` to fetch recent arXiv papers.
 
 ## Step 5: Add Keyword Relevance Scoring Agent
 
-Created:
-
-```text
-app/agents/relevance_agent.py
-```
-
-Implemented:
-
-- keyword matching
-- relevance score from 0 to 10
-- matched keyword tracking
-- sorting by relevance
-
----
+Created `app/agents/relevance_agent.py`.
 
 ## Step 6: Add SQLite Storage Layer
 
-Created:
-
-```text
-app/data/storage.py
-```
-
-Implemented:
-
-- database initialization
-- paper saving
-- top paper retrieval
-- duplicate handling
-
----
+Created `app/data/storage.py`.
 
 ## Step 7: Add Mock LLM Summarization Agent
 
-Created:
-
-```text
-app/agents/summarizer_agent.py
-```
-
-Implemented:
-
-- mock structured summaries
-- summary field added to each paper
-- fallback summarization logic
-
----
+Created `app/agents/summarizer_agent.py`.
 
 ## Step 8: Store LLM Summary in SQLite
 
-Updated SQLite schema to include:
-
-```text
-llm_summary
-```
-
-Updated:
-
-- insert query
-- top paper query
-- terminal output
-
----
+Added `llm_summary` to the database schema.
 
 ## Step 8A: Add Ollama Summarization
 
-Added Ollama support using:
-
-```text
-llama3.2:1b
-```
-
-Implemented:
-
-- local LLM summarization
-- fallback to mock summarizer
-- model configuration through `config.yaml`
-
----
+Added local LLM summarization with Ollama.
 
 ## Step 8B: Track Summary Method
 
-Added:
-
-```text
-summary_method
-```
-
-Possible values:
-
-```text
-ollama:<model>
-mock
-mock_fallback
-unknown
-```
-
-Stored and printed the method used for each summary.
-
----
+Stored whether each paper used Ollama, mock, or fallback summarization.
 
 ## Step 9: Generate Daily Markdown Research Report
 
-Created:
-
-```text
-app/workflows/report_generator.py
-```
-
-Implemented:
-
-- markdown report generation
-- timestamped reports
-- summaries, scores, keywords, URLs
-- report storage in `reports/`
-
----
+Created `app/workflows/report_generator.py`.
 
 ## Step 10: Add LangGraph Workflow Orchestration
 
-Created:
-
-```text
-app/workflows/research_graph.py
-```
-
-Workflow:
-
-```text
-Fetch Papers → Score Relevance → Summarize → Store → Generate Report
-```
-
-Updated `main.py` to invoke the LangGraph workflow.
-
----
+Created `app/workflows/research_graph.py`.
 
 ## Step 11: Add Observability and Timing Metrics
 
-Created:
-
-```text
-app/utils.py
-```
-
-Added:
-
-- `timed_node` decorator
-- node-level execution times
-- total workflow runtime
-- clearer terminal logs
-
----
+Created `app/utils.py` with timing decorators.
 
 ## Step 12: Add Streamlit Dashboard
 
-Created:
-
-```text
-app/dashboard/streamlit_app.py
-```
-
-Added:
-
-- paper dashboard
-- score filtering
-- summary method filtering
-- expandable summaries
-- arXiv links
-
----
+Created `app/dashboard/streamlit_app.py`.
 
 ## Step 12B: Add Dashboard Search and Charts
 
-Added:
-
-- keyword search
-- relevance score bar chart
-- summary method pie chart
-- total/filtered paper metrics
-
----
+Added search, filtering, score charts, and summary method charts.
 
 ## Step 13: Add Tests
 
-Created:
-
-```text
-tests/test_relevance_agent.py
-tests/test_report_generator.py
-```
-
-Test coverage:
-
-- relevance scoring
-- keyword matching
-- sorting by relevance
-- markdown report generation
-
----
+Created relevance and report generation tests.
 
 ## Step 14: Add GitHub Actions CI
 
-Created:
-
-```text
-.github/workflows/tests.yml
-```
-
-CI workflow:
-
-```text
-checkout repo
-setup Python
-install dependencies
-run pytest
-```
-
----
+Created `.github/workflows/tests.yml`.
 
 ## Step 15: Finalize README
 
-Created a GitHub-ready README with:
-
-- project overview
-- architecture
-- setup
-- running instructions
-- dashboard instructions
-- tests
-- CI
-- portfolio highlights
-
----
+Created a GitHub-ready README.
 
 ## Step 16: Add Vector DB + RAG Foundation
 
-Installed:
-
-```text
-chromadb
-sentence-transformers
-```
-
-Created:
-
-```text
-app/data/vector_store.py
-```
-
-Implemented:
-
-- ChromaDB persistent storage
-- local embeddings
-- semantic search
-
----
+Added ChromaDB and SentenceTransformers.
 
 ## Step 16B: Add Vector Indexing to LangGraph
 
-Updated workflow to:
-
-```text
-store papers in SQLite
-index papers in ChromaDB
-```
-
----
+Indexed papers into ChromaDB during workflow execution.
 
 ## Step 17: Add Semantic Search Script
 
-Created:
-
-```text
-rag_query.py
-```
-
-Implemented command-line semantic search over indexed papers.
-
----
+Created `rag_query.py`.
 
 ## Step 18: Add RAG Answer Generator
 
-Created:
-
-```text
-app/agents/rag_answer_agent.py
-```
-
-Implemented:
-
-- context builder
-- retrieved-context answering
-- Ollama answer generation
-- fallback to retrieved context
-
----
+Created `app/agents/rag_answer_agent.py`.
 
 ## Step 18B: Upgrade RAG Query Script
 
-Updated:
-
-```text
-rag_query.py
-```
-
-Added:
-
-- question input
-- semantic retrieval
-- RAG answer synthesis
-- retrieved paper display
-
----
+Added full command-line RAG QA.
 
 ## Step 18C: Add RAG QA to Streamlit
 
-Updated dashboard with:
-
-```text
-Paper Dashboard tab
-RAG Research QA tab
-```
-
-Added:
-
-- question input
-- top-k retrieval slider
-- Ollama toggle
-- model input
-- retrieved paper display
-
----
+Added RAG Research QA tab.
 
 ## Step 19: Add PDF Ingestion Dependencies
 
-Installed:
-
-```text
-pymupdf
-tqdm
-```
-
-Created:
-
-```text
-data/pdfs/
-data/parsed/
-app/data/pdf_ingestor.py
-```
-
----
+Added PyMuPDF and PDF folders.
 
 ## Step 19A: Add PDF Download and Text Extraction
 
-Implemented:
-
-- PDF download
-- safe filenames
-- text extraction with PyMuPDF
-- parsed text saving
-- ingestion status tracking
-
----
+Created PDF ingestion logic.
 
 ## Step 19B: Add Full-Paper Text Chunking
 
-Created:
-
-```text
-app/data/text_chunker.py
-```
-
-Implemented:
-
-- chunking with overlap
-- chunk records
-- chunk metadata
-
----
+Created `app/data/text_chunker.py`.
 
 ## Step 19C: Add Chunked Vector Indexing
 
-Updated:
-
-```text
-app/data/vector_store.py
-```
-
-Changed vector indexing from one embedding per paper to many embeddings per full-paper chunk.
-
----
+Updated ChromaDB indexing to use full-paper chunks.
 
 ## Step 19D: Add PDF Ingestion into LangGraph
 
-Updated workflow:
-
-```text
-Fetch → Score → Summarize → PDF Ingest → Store + Index → Report
-```
-
-Added `pdf_ingest` node.
-
----
+Added a PDF ingestion node.
 
 ## Step 19E: Update RAG Answer Agent for Chunk Citations
 
-Updated RAG context to include:
-
-- paper title
-- published date
-- relevance score
-- chunk index
-- paper ID
-
-Updated answer format to include supporting paper chunks.
-
----
+Added chunk metadata to RAG context.
 
 ## Step 20: Add PDF Ingestion Controls to Config
 
-Added:
-
-```yaml
-pdf:
-  ingest_full_text: true
-  max_pdfs: 2
-  chunk_size: 1000
-  chunk_overlap: 150
-```
-
-Purpose:
-
-- control long runtimes
-- avoid laptop overload
-- limit number of downloaded PDFs
-
----
+Added configurable PDF ingestion controls.
 
 ## Step 20A: Limit PDF Ingestion Using Config
 
-Updated `pdf_ingest_node` to:
+Limited PDF downloading to `max_pdfs`.
 
-- respect `ingest_full_text`
-- only download first `max_pdfs`
-- leave other papers as abstract-only records
+## Step 21: Add Research Trend Detection
+
+Added trend detection dependencies.
+
+## Step 21B: Create Trend Analysis Module
+
+Created `app/data/trend_analysis.py`.
+
+## Step 21C: Add Trend Analytics to Streamlit
+
+Added the Trend Analytics dashboard tab.
 
 ---
 
@@ -978,6 +663,7 @@ RAG QA
 ChromaDB vector search
 PDF ingestion
 Full-paper chunked retrieval
+Trend analytics
 Testing
 GitHub Actions CI
 ```
@@ -987,12 +673,12 @@ GitHub Actions CI
 ## Recommended Next Steps
 
 1. Add Docker support
-2. Add better RAG evaluation tests
+2. Add RAG evaluation tests
 3. Add scheduled daily ingestion
 4. Add email/Slack research digest
 5. Add deployment instructions
 6. Add page-level citation extraction
-7. Add topic clustering and trend detection
+7. Add topic clustering and trend detection over time
 
 ---
 

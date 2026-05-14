@@ -14,6 +14,11 @@ import yaml
 from app.data.vector_store import semantic_search
 from app.agents.rag_answer_agent import generate_rag_answer
 
+from app.data.trend_analysis import (
+    extract_trending_terms,
+    keyword_frequency_analysis,
+)
+
 
 DB_PATH = "papers.db"
 
@@ -56,7 +61,9 @@ st.title("Agentic arXiv Research Scanner")
 config = load_config()
 df = load_papers()
 
-tab1, tab2 = st.tabs(["Paper Dashboard", "RAG Research QA"])
+tab1, tab2, tab3 = st.tabs(
+    ["Paper Dashboard", "RAG Research QA", "Trend Analytics"]
+)
 
 with tab1:
     st.sidebar.header("Filters")
@@ -240,3 +247,64 @@ with tab2:
                     st.write(f"Summary Method: {metadata['summary_method']}")
                     st.write(f"Distance: {distance:.4f}")
                     st.markdown(f"[Open arXiv Paper]({doc_id})")
+
+
+with tab3:
+    st.subheader("Research Trend Analytics")
+
+    st.write(
+        "This section identifies frequent themes and high-signal research terms "
+        "across the indexed arXiv papers."
+    )
+
+    top_n = st.slider(
+        "Number of terms to show",
+        min_value=5,
+        max_value=30,
+        value=15,
+    )
+
+    trending_terms = extract_trending_terms(df, top_n=top_n)
+    keyword_freq = keyword_frequency_analysis(df, top_n=top_n)
+
+    trend_df = pd.DataFrame(
+        trending_terms,
+        columns=["term", "score"],
+    )
+
+    keyword_df = pd.DataFrame(
+        keyword_freq,
+        columns=["keyword", "count"],
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Top TF-IDF Research Terms")
+
+        fig_terms = px.bar(
+            trend_df,
+            x="score",
+            y="term",
+            orientation="h",
+            title="Trending Research Terms",
+        )
+
+        st.plotly_chart(fig_terms, use_container_width=True)
+
+        st.dataframe(trend_df, use_container_width=True)
+
+    with col2:
+        st.subheader("Top Matched Keywords")
+
+        fig_keywords = px.bar(
+            keyword_df,
+            x="count",
+            y="keyword",
+            orientation="h",
+            title="Matched Keyword Frequency",
+        )
+
+        st.plotly_chart(fig_keywords, use_container_width=True)
+
+        st.dataframe(keyword_df, use_container_width=True)
