@@ -1,0 +1,39 @@
+project:
+  name: agentic-arxiv-research-scanner
+
+arxiv:
+  categories:
+    - cs.AI
+    - cs.LG
+    - cs.CL
+    - q-fin.TR
+    - q-fin.ST
+  max_results: 5
+  sort_by: submittedDate
+
+interests:
+  keywords:
+    - agentic ai
+    - rag
+    - retrieval augmented generation
+    - large language models
+    - llm
+    - machine learning
+    - deep learning
+    - reinforcement learning
+    - quant finance
+    - trading
+    - market microstructure
+    - alpha
+    - forecasting
+
+llm:
+  use_ollama: true
+  model: llama3.2:1b
+  num_ctx: 1024
+
+pdf:
+  ingest_full_text: true
+  max_pdfs: 2
+  chunk_size: 1000
+  chunk_overlap: 150

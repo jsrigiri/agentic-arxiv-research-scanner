@@ -1,0 +1,15 @@
+arxiv
+pandas
+pyyaml
+requests
+python-dotenv
+pytest
+rich
+ollama
+langgraph
+streamlit
+plotly
+chromadb
+sentence-transformers
+pymupdf
+tqdm
