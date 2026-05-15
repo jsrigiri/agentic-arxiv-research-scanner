@@ -3,6 +3,13 @@ from pathlib import Path
 import requests
 from rich import print
 
+import os
+from dotenv import load_dotenv
+
+
+
+
+
 
 def send_slack_digest(
     config: dict,
@@ -14,11 +21,10 @@ def send_slack_digest(
     if not slack_config.get("enabled", False):
         print("[bold yellow]Slack digest disabled[/bold yellow]")
         return False
+    
+    load_dotenv()
 
-    webhook_url = slack_config.get(
-        "webhook_url",
-        "",
-    )
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL") or slack_config.get("webhook_url", "")
 
     if not webhook_url:
         print(
