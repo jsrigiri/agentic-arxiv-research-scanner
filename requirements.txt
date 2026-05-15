@@ -16,3 +16,7 @@ tqdm
 scikit-learn
 wordcloud
 matplotlib
+schedule
+ruamel.yaml
+umap-learn
+hdbscan

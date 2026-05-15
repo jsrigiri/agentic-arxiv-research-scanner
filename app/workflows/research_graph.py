@@ -10,6 +10,8 @@ from app.workflows.report_generator import generate_markdown_report
 from app.utils import timed_node
 from app.data.vector_store import index_papers
 from app.data.pdf_ingestor import ingest_pdf_for_paper
+from app.notifications.email_digest import send_email_digest
+from app.notifications.slack_digest import send_slack_digest
 
 
 class ResearchState(TypedDict):
@@ -115,7 +117,29 @@ def store_node(state: ResearchState) -> ResearchState:
 
 @timed_node("generate_report")
 def report_node(state: ResearchState) -> ResearchState:
-    state["report_path"] = generate_markdown_report(state["top_papers"])
+
+    state["report_path"] = generate_markdown_report(
+        state["top_papers"]
+    )
+
+    # ---------------------------------
+    # Send email digest
+    # ---------------------------------
+
+    send_email_digest(
+        config=state["config"],
+        report_path=state["report_path"],
+    )
+
+    # ---------------------------------
+    # Send Slack digest
+    # ---------------------------------
+
+    send_slack_digest(
+        config=state["config"],
+        report_path=state["report_path"],
+    )
+
     return state
 
 
