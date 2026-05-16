@@ -33,6 +33,7 @@ def main() -> None:
         "summarized_papers": [],
         "top_papers": [],
         "report_path": "",
+        "reviewed_papers": [],
     }
 
     print("\n[bold yellow]Running Agentic Research Workflow...[/bold yellow]")

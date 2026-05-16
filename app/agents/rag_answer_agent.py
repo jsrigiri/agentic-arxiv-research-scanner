@@ -15,7 +15,8 @@ def build_context(results: Dict[str, Any]) -> str:
     ):
         context_blocks.append(
     f"""
-Chunk {idx}
+Source {idx}
+Citation ID: [S{idx}]
 Title: {metadata.get("title", "")}
 Published: {metadata.get("published", "")}
 Relevance Score: {metadata.get("relevance_score", "")}
@@ -56,8 +57,8 @@ Retrieved Context:
 {context}
 
 Return:
-1. Direct answer
-2. Supporting paper chunks with titles and chunk indexes
+1. Direct answer with inline citations like [S1], [S2]
+2. Supporting evidence table with Citation ID, paper title, and chunk index
 3. Practical implementation ideas
 4. Limitations or missing evidence
 """

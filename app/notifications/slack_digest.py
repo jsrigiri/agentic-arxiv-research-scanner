@@ -7,8 +7,7 @@ import os
 from dotenv import load_dotenv
 
 
-
-
+load_dotenv()
 
 
 def send_slack_digest(
@@ -22,9 +21,10 @@ def send_slack_digest(
         print("[bold yellow]Slack digest disabled[/bold yellow]")
         return False
     
-    load_dotenv()
-
-    webhook_url = os.getenv("SLACK_WEBHOOK_URL") or slack_config.get("webhook_url", "")
+    webhook_url = os.getenv(
+        "SLACK_WEBHOOK_URL",
+        ""
+    )
 
     if not webhook_url:
         print(

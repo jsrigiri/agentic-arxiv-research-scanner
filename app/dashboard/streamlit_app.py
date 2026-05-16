@@ -24,6 +24,7 @@ from app.workflows.research_graph import build_research_graph
 from app.notifications.slack_digest import send_slack_digest
 from app.data.topic_clustering import run_topic_clustering
 from app.evaluation.rag_evaluator import evaluate_rag_response
+from app.data.storage import fetch_trend_history
 
 
 DB_PATH = "papers.db"
@@ -41,7 +42,12 @@ def load_papers():
         matched_keywords,
         summary_method,
         entry_id,
-        llm_summary
+        llm_summary,
+        critic_review,
+        implementation_review,
+        quant_relevance_review,
+        limitations_review,
+        review_method
     FROM papers
     ORDER BY relevance_score DESC, published DESC
     """
@@ -197,6 +203,24 @@ with tab1:
             with st.expander("LLM Summary"):
                 st.write(row["llm_summary"])
 
+
+            with st.expander("Multi-Agent Review"):
+
+                st.write("Review Method")
+                st.write(row.get("review_method", "unknown"))
+
+                st.write("Critic Review")
+                st.write(row.get("critic_review", ""))
+
+                st.write("Implementation Review")
+                st.write(row.get("implementation_review", ""))
+
+                st.write("Quant Relevance Review")
+                st.write(row.get("quant_relevance_review", ""))
+
+                st.write("Limitations Review")
+                st.write(row.get("limitations_review", ""))
+
             st.divider()
 
 
@@ -288,7 +312,7 @@ with tab2:
             with st.expander("Detailed Evaluation Metrics"):
                 st.json(evaluation)
 
-            st.subheader("Retrieved Papers")
+            st.subheader("Citation Sources")
 
             ids = results["ids"][0]
             metadatas = results["metadatas"][0]
@@ -298,12 +322,17 @@ with tab2:
                 zip(ids, metadatas, distances),
                 start=1,
             ):
-                with st.expander(f"{idx}. {metadata['title']}"):
+                citation_id = f"[S{idx}]"
+
+                with st.expander(
+                    f"{citation_id} {metadata['title']} | Chunk {metadata.get('chunk_index', 'N/A')}"
+                ):
                     st.write(f"Published: {metadata['published']}")
                     st.write(f"Relevance Score: {metadata['relevance_score']}")
                     st.write(f"Summary Method: {metadata['summary_method']}")
+                    st.write(f"Chunk Index: {metadata.get('chunk_index', 'N/A')}")
                     st.write(f"Distance: {distance:.4f}")
-                    st.markdown(f"[Open arXiv Paper]({doc_id})")
+                    st.markdown(f"[Open arXiv Paper]({metadata.get('paper_id', doc_id)})")
 
 
 with tab3:
@@ -365,6 +394,63 @@ with tab3:
         st.plotly_chart(fig_keywords, use_container_width=True)
 
         st.dataframe(keyword_df, use_container_width=True)
+
+    st.divider()
+
+    st.subheader("Historical Trend Evolution")
+
+    trend_history_rows = fetch_trend_history()
+
+    if not trend_history_rows:
+        st.info("No historical trend snapshots found yet. Run the workflow first.")
+    else:
+        trend_history_df = pd.DataFrame(
+            trend_history_rows,
+            columns=[
+                "snapshot_date",
+                "term",
+                "score",
+                "source",
+            ],
+        )
+
+        top_terms = (
+            trend_history_df.groupby("term")["score"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .index
+            .tolist()
+        )
+
+        selected_terms = st.multiselect(
+            "Select terms to visualize",
+            options=sorted(trend_history_df["term"].unique().tolist()),
+            default=top_terms[:5],
+        )
+
+        filtered_history = trend_history_df[
+            trend_history_df["term"].isin(selected_terms)
+        ]
+
+        fig_history = px.line(
+            filtered_history,
+            x="snapshot_date",
+            y="score",
+            color="term",
+            markers=True,
+            title="Research Trend Evolution Over Time",
+        )
+
+        st.plotly_chart(fig_history, use_container_width=True)
+
+        st.dataframe(
+            trend_history_df.sort_values(
+                ["snapshot_date", "score"],
+                ascending=[False, False],
+            ),
+            use_container_width=True,
+        )
 
 
 def save_config(config: dict, path: str = "config.yaml") -> None:

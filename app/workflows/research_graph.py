@@ -13,12 +13,26 @@ from app.data.pdf_ingestor import ingest_pdf_for_paper
 from app.notifications.email_digest import send_email_digest
 from app.notifications.slack_digest import send_slack_digest
 
+from datetime import datetime
+import pandas as pd
+
+from app.data.trend_analysis import extract_trending_terms
+
+from app.data.storage import (
+    initialize_trend_tables,
+    save_trend_snapshot,
+)
+
+from app.agents.reviewer_agent import review_papers
+from app.data.storage import fetch_recent_stored_papers
+
 
 class ResearchState(TypedDict):
     config: Dict[str, Any]
     papers: List[Dict[str, Any]]
     scored_papers: List[Dict[str, Any]]
     summarized_papers: List[Dict[str, Any]]
+    reviewed_papers: List[Dict[str, Any]]
     top_papers: List[Any]
     report_path: str
 
@@ -27,10 +41,19 @@ class ResearchState(TypedDict):
 def fetch_node(state: ResearchState) -> ResearchState:
     config = state["config"]
 
-    state["papers"] = fetch_recent_papers(
-        categories=config["arxiv"]["categories"],
-        max_results=config["arxiv"]["max_results"],
-    )
+    try:
+        state["papers"] = fetch_recent_papers(
+            categories=config["arxiv"]["categories"],
+            max_results=config["arxiv"]["max_results"],
+        )
+
+    except Exception as e:
+        print(f"[bold red]arXiv fetch failed:[/bold red] {e}")
+        print("[yellow]Using recently stored papers as fallback.[/yellow]")
+
+        state["papers"] = fetch_recent_stored_papers(
+            limit=config["arxiv"]["max_results"]
+        )
 
     return state
 
@@ -74,7 +97,7 @@ def pdf_ingest_node(state: ResearchState) -> ResearchState:
     ingested_papers = []
 
     for idx, paper in enumerate(
-        state["summarized_papers"]
+        state["reviewed_papers"]
     ):
 
         # ---------------------------------
@@ -96,7 +119,7 @@ def pdf_ingest_node(state: ResearchState) -> ResearchState:
                 paper
             )
 
-    state["summarized_papers"] = ingested_papers
+    state["reviewed_papers"] = ingested_papers
 
     return state
 
@@ -105,10 +128,34 @@ def pdf_ingest_node(state: ResearchState) -> ResearchState:
 def store_node(state: ResearchState) -> ResearchState:
 
     initialize_database()
+    initialize_trend_tables()
 
-    save_papers(state["summarized_papers"])
+    save_papers(state["reviewed_papers"])
 
-    index_papers(state["summarized_papers"])
+    index_papers(state["reviewed_papers"])
+
+    # ---------------------------------
+    # Save trend snapshots
+    # ---------------------------------
+
+    trend_df = pd.DataFrame(
+        state["reviewed_papers"]
+    )
+
+    trend_terms = extract_trending_terms(
+        trend_df,
+        top_n=20,
+    )
+
+    snapshot_date = datetime.now().strftime(
+        "%Y-%m-%d"
+    )
+
+    save_trend_snapshot(
+        snapshot_date=snapshot_date,
+        trend_terms=trend_terms,
+        source="tfidf",
+    )
 
     state["top_papers"] = fetch_top_papers(limit=10)
 
@@ -143,12 +190,27 @@ def report_node(state: ResearchState) -> ResearchState:
     return state
 
 
+@timed_node("review_papers")
+def review_node(state: ResearchState) -> ResearchState:
+
+    config = state["config"]
+
+    state["reviewed_papers"] = review_papers(
+        papers=state["summarized_papers"],
+        use_ollama=config["llm"]["use_ollama"],
+        model=config["llm"]["model"],
+    )
+
+    return state
+
+
 def build_research_graph():
     graph = StateGraph(ResearchState)
 
     graph.add_node("fetch", fetch_node)
     graph.add_node("score", score_node)
     graph.add_node("summarize", summarize_node)
+    graph.add_node("review", review_node)
     graph.add_node("pdf_ingest", pdf_ingest_node)
     graph.add_node("store", store_node)
     graph.add_node("report", report_node)
@@ -158,7 +220,8 @@ def build_research_graph():
     graph.add_edge("fetch", "score")
     graph.add_edge("score", "summarize")
 
-    graph.add_edge("summarize", "pdf_ingest")
+    graph.add_edge("summarize", "review")
+    graph.add_edge("review", "pdf_ingest")
     graph.add_edge("pdf_ingest", "store")
     graph.add_edge("store", "report")
     graph.add_edge("report", END)

@@ -42,6 +42,30 @@ def generate_markdown_report(
         lines.append("\n### Summary\n")
         lines.append(f"{llm_summary}\n")
 
+        if len(paper) >= 12:
+            (
+                critic_review,
+                implementation_review,
+                quant_relevance_review,
+                limitations_review,
+                review_method,
+            ) = paper[7:12]
+
+            lines.append("\n### Multi-Agent Review\n")
+            lines.append(f"**Review Method:** {review_method}\n")
+
+            lines.append("\n#### Critic Review\n")
+            lines.append(f"{critic_review}\n")
+
+            lines.append("\n#### Implementation Review\n")
+            lines.append(f"{implementation_review}\n")
+
+            lines.append("\n#### Quant Relevance Review\n")
+            lines.append(f"{quant_relevance_review}\n")
+
+            lines.append("\n#### Limitations Review\n")
+            lines.append(f"{limitations_review}\n")
+
         lines.append("\n---\n")
 
     report_content = "\n".join(lines)

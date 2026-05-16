@@ -50,5 +50,4 @@ email:
   subject_prefix: Daily arXiv Research Brief
 
 slack:
-  enabled: false
-  webhook_url: ""
+  enabled: true

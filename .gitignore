@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 .env
-reports/*.md
+reports/
 data/
 *.db
+config.local.yaml
+chroma_db/
