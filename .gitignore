@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 .env
 reports/
-data/
+/data/
 *.db
 config.local.yaml
 chroma_db/
