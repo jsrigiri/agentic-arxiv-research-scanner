@@ -21,15 +21,19 @@ def generate_markdown_report(
 
     for idx, paper in enumerate(papers, start=1):
 
-        (
-            title,
-            published,
-            score,
-            matched,
-            url,
-            llm_summary,
-            summary_method,
-        ) = paper
+        title = paper[0]
+        published = paper[1]
+        score = paper[2]
+        matched = paper[3]
+        url = paper[4]
+        llm_summary = paper[5]
+        summary_method = paper[6]
+
+        critic_review = paper[7] if len(paper) > 7 else ""
+        implementation_review = paper[8] if len(paper) > 8 else ""
+        quant_relevance_review = paper[9] if len(paper) > 9 else ""
+        limitations_review = paper[10] if len(paper) > 10 else ""
+        review_method = paper[11] if len(paper) > 11 else "unknown"
 
         lines.append(f"## {idx}. {title}\n")
 
@@ -41,6 +45,21 @@ def generate_markdown_report(
 
         lines.append("\n### Summary\n")
         lines.append(f"{llm_summary}\n")
+
+        lines.append("\n### Multi-Agent Review\n")
+        lines.append(f"**Review Method:** {review_method}\n")
+
+        lines.append("\n#### Critic Review\n")
+        lines.append(f"{critic_review}\n")
+
+        lines.append("\n#### Implementation Review\n")
+        lines.append(f"{implementation_review}\n")
+
+        lines.append("\n#### Quant Relevance Review\n")
+        lines.append(f"{quant_relevance_review}\n")
+
+        lines.append("\n#### Limitations Review\n")
+        lines.append(f"{limitations_review}\n")
 
         if len(paper) >= 12:
             (

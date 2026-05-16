@@ -24,7 +24,12 @@ from app.workflows.research_graph import build_research_graph
 from app.notifications.slack_digest import send_slack_digest
 from app.data.topic_clustering import run_topic_clustering
 from app.evaluation.rag_evaluator import evaluate_rag_response
-from app.data.storage import fetch_trend_history
+
+from app.data.storage import (
+    initialize_database,
+    initialize_trend_tables,
+    fetch_trend_history,
+)
 
 
 DB_PATH = "papers.db"
@@ -32,6 +37,9 @@ DB_PATH = "papers.db"
 
 @st.cache_data
 def load_papers():
+    initialize_database()
+    initialize_trend_tables()
+
     conn = sqlite3.connect(DB_PATH)
 
     query = """
@@ -52,7 +60,26 @@ def load_papers():
     ORDER BY relevance_score DESC, published DESC
     """
 
-    df = pd.read_sql_query(query, conn)
+    try:
+        df = pd.read_sql_query(query, conn)
+    except Exception:
+        df = pd.DataFrame(
+            columns=[
+                "title",
+                "published",
+                "relevance_score",
+                "matched_keywords",
+                "summary_method",
+                "entry_id",
+                "llm_summary",
+                "critic_review",
+                "implementation_review",
+                "quant_relevance_review",
+                "limitations_review",
+                "review_method",
+            ]
+        )
+
     conn.close()
 
     return df
@@ -75,6 +102,10 @@ st.set_page_config(
 st.title("Agentic arXiv Research Scanner")
 
 config = load_config()
+
+initialize_database()
+initialize_trend_tables()
+
 df = load_papers()
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(

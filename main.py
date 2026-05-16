@@ -82,15 +82,19 @@ def main() -> None:
 
     for idx, paper in enumerate(final_state["top_papers"], start=1):
 
-        (
-            title,
-            published,
-            score,
-            matched,
-            url,
-            llm_summary,
-            summary_method,
-        ) = paper
+        title = paper[0]
+        published = paper[1]
+        score = paper[2]
+        matched = paper[3]
+        url = paper[4]
+        llm_summary = paper[5]
+        summary_method = paper[6]
+
+        critic_review = paper[7] if len(paper) > 7 else ""
+        implementation_review = paper[8] if len(paper) > 8 else ""
+        quant_relevance_review = paper[9] if len(paper) > 9 else ""
+        limitations_review = paper[10] if len(paper) > 10 else ""
+        review_method = paper[11] if len(paper) > 11 else "unknown"
 
         print(f"\n[bold cyan]{idx}. {title}[/bold cyan]")
 
@@ -103,6 +107,21 @@ def main() -> None:
         print(f"\n[bold yellow]Summary[/bold yellow]")
 
         print(llm_summary)
+
+        print(f"\n[bold yellow]Multi-Agent Review[/bold yellow]")
+        print(f"Review Method: {review_method}")
+
+        print("\nCritic Review:")
+        print(critic_review)
+
+        print("\nImplementation Review:")
+        print(implementation_review)
+
+        print("\nQuant Relevance Review:")
+        print(quant_relevance_review)
+
+        print("\nLimitations Review:")
+        print(limitations_review)                           
 
 
 if __name__ == "__main__":

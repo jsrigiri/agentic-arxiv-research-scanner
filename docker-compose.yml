@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+
+  agentic-arxiv-app:
+    build: .
+    container_name: agentic-arxiv-app
+
+    ports:
+      - "8501:8501"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./reports:/app/reports
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+
+    restart: unless-stopped
+
+    command: >
+      streamlit run app/dashboard/streamlit_app.py
