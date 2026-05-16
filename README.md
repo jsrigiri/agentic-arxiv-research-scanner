@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PDF-Full_Text_RAG-F59E0B?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Scheduler-Autonomous-06B6D4?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Slack-Notifications-4A154B?style=for-the-badge&logo=slack" />
-  <img src="https://img.shields.io/badge/Email-Digest-EA4335?style=for-the-badge&logo=gmail" />
+  <img src="https://img.shields.io/badge/Docker-Deployment-2496ED?style=for-the-badge&logo=docker" />
 </p>
 
 <p>
@@ -38,7 +38,7 @@ Scan arXiv → Score Relevance → Summarize Papers → Ingest PDFs → Build RA
 
 # 📌 Project Overview
 
-An end-to-end **agentic AI research intelligence platform** that scans arXiv for recent **AI/ML** and **quant finance** papers, scores relevance, generates local LLM summaries, ingests full PDFs, builds vector embeddings, performs semantic and citation-aware RAG retrieval, analyzes research trends, clusters research topics, evaluates RAG quality, supports multi-agent paper reviewing, and delivers autonomous reports through Streamlit, email, Slack, and scheduled workflows.
+An end-to-end **agentic AI research intelligence platform** that scans arXiv for recent **AI/ML** and **quant finance** papers, scores relevance, generates local LLM summaries, ingests full PDFs, builds vector embeddings, performs semantic and citation-aware RAG retrieval, analyzes research trends, clusters research topics, evaluates RAG quality, supports multi-agent paper reviewing, and delivers autonomous reports through Streamlit, email, Slack, scheduled workflows, and Dockerized deployment.
 
 ---
 
@@ -65,9 +65,11 @@ An end-to-end **agentic AI research intelligence platform** that scans arXiv for
 - Autonomous scheduler
 - Email digest
 - Slack notifications
+- Docker deployment
+- Persistent Docker volumes
 - Workflow observability
 - GitHub Actions CI
-- Pytest unit tests
+- Expanded Pytest test suite
 
 ---
 
@@ -97,6 +99,8 @@ Trend Analytics + Topic Clustering
 Streamlit Dashboard
     ↓
 Scheduler + Email + Slack
+    ↓
+Dockerized Runtime
 ```
 
 ---
@@ -132,6 +136,13 @@ Scheduler + Email + Slack
 - PyMuPDF
 - requests
 - tqdm
+
+## Deployment
+
+- Docker
+- Docker Compose
+- Persistent local volumes
+- GitHub Actions CI
 
 ---
 
@@ -174,11 +185,15 @@ agentic-arxiv-research-scanner/
 ├── chroma_db/
 ├── data/
 │   ├── pdfs/
-│   └── parsed/
+│   ├── parsed/
+│   └── papers.db
 │
 ├── reports/
 ├── tests/
 ├── .github/workflows/tests.yml
+├── .dockerignore
+├── Dockerfile
+├── docker-compose.yml
 ├── config.yaml
 ├── main.py
 ├── scheduler.py
@@ -362,6 +377,40 @@ Features:
 
 ---
 
+# 🐳 Docker Deployment
+
+Run the dashboard with Docker:
+
+```bash
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:8501
+```
+
+Run the workflow inside Docker:
+
+```bash
+docker compose exec agentic-arxiv-app python main.py
+```
+
+Run the scheduler inside Docker:
+
+```bash
+docker compose exec agentic-arxiv-app python scheduler.py
+```
+
+Docker persists:
+
+- `reports/`
+- `data/`
+- `chroma_db/`
+
+---
+
 # 📬 Email Digest
 
 Supported providers:
@@ -417,6 +466,7 @@ Protected secrets include:
 
 - email passwords
 - Slack webhooks
+- future API keys
 
 ---
 
@@ -424,6 +474,12 @@ Protected secrets include:
 
 ```bash
 pytest -v
+```
+
+Current status:
+
+```text
+15 passed
 ```
 
 ---
@@ -457,6 +513,8 @@ This project demonstrates:
 - Semantic retrieval
 - AI workflow observability
 - Autonomous scheduling
+- Dockerized AI deployment
+- Containerized GenAI systems
 - Research intelligence systems
 - AI + Quant Finance integration
 
@@ -654,11 +712,33 @@ This project demonstrates:
 - Step 25D: Clean Git History
 - Step 25E: Prevent Future Secret Leaks
 
+#### Step 26: Add Docker Deployment
+
+- Step 26A: Add `.dockerignore`
+- Step 26B: Create Dockerfile
+- Step 26C: Create `docker-compose.yml`
+- Step 26D: Add persistent volumes
+- Step 26E: Run Streamlit inside Docker
+- Step 26F: Run workflow inside Docker
+- Step 26G: Run scheduler inside Docker
+
+#### Step 27: Expand Automated Testing
+
+- Step 27A: Add RAG Evaluator Tests
+- Step 27B: Add Text Chunker Tests
+- Step 27C: Add Trend Analysis Tests
+- Step 27D: Add Reviewer Agent Tests
+- Step 27E: Add Topic Clustering Tests
+- Step 27F: Run Full Test Suite
+- Step 27G: Confirm `15 passed`
+
 ---
 
 # 🔮 Future Improvements
 
-- Docker deployment
+- Multi-container Docker architecture
+- Separate scheduler container
+- Ollama container integration
 - Streamlit Cloud deployment
 - Multi-agent reviewer collaboration
 - Trend evolution over time
