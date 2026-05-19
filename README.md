@@ -24,6 +24,7 @@
   <img src="https://img.shields.io/badge/Scheduler-Autonomous-06B6D4?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Slack-Notifications-4A154B?style=for-the-badge&logo=slack" />
   <img src="https://img.shields.io/badge/Docker-Deployment-2496ED?style=for-the-badge&logo=docker" />
+  <img src="https://img.shields.io/badge/Kubernetes-Orchestration-326CE5?style=for-the-badge&logo=kubernetes" />
 </p>
 
 <p>
@@ -38,7 +39,7 @@ Scan arXiv → Score Relevance → Summarize Papers → Ingest PDFs → Build RA
 
 # 📌 Project Overview
 
-An end-to-end **agentic AI research intelligence platform** that scans arXiv for recent **AI/ML** and **quant finance** papers, scores relevance, generates local LLM summaries, ingests full PDFs, builds vector embeddings, performs semantic and citation-aware RAG retrieval, analyzes research trends, clusters research topics, evaluates RAG quality, supports multi-agent paper reviewing, and delivers autonomous reports through Streamlit, email, Slack, scheduled workflows, and Dockerized deployment.
+An end-to-end **agentic AI research intelligence platform** that scans arXiv for recent **AI/ML** and **quant finance** papers, scores relevance, generates local LLM summaries, ingests full PDFs, builds vector embeddings, performs semantic and citation-aware RAG retrieval, analyzes research trends, clusters research topics, evaluates RAG quality, supports multi-agent paper reviewing, and delivers autonomous reports through Streamlit, email, Slack, scheduled workflows, Docker, and Kubernetes.
 
 ---
 
@@ -55,6 +56,7 @@ An end-to-end **agentic AI research intelligence platform** that scans arXiv for
 - Streamlit dashboard
 - Citation-aware RAG research QA
 - ChromaDB vector database
+- ChromaDB server container support
 - Full-paper PDF ingestion
 - Chunked semantic retrieval
 - Trend analytics
@@ -66,7 +68,10 @@ An end-to-end **agentic AI research intelligence platform** that scans arXiv for
 - Email digest
 - Slack notifications
 - Docker deployment
-- Persistent Docker volumes
+- Multi-container Docker Compose architecture
+- Kubernetes deployment manifests
+- Kubernetes ConfigMap and Secret support
+- Persistent Docker/Kubernetes storage patterns
 - Workflow observability
 - GitHub Actions CI
 - Expanded Pytest test suite
@@ -100,7 +105,7 @@ Streamlit Dashboard
     ↓
 Scheduler + Email + Slack
     ↓
-Dockerized Runtime
+Docker / Kubernetes Runtime
 ```
 
 ---
@@ -141,7 +146,11 @@ Dockerized Runtime
 
 - Docker
 - Docker Compose
-- Persistent local volumes
+- Kubernetes
+- ConfigMaps
+- Secrets
+- Services
+- Deployments
 - GitHub Actions CI
 
 ---
@@ -152,42 +161,24 @@ Dockerized Runtime
 agentic-arxiv-research-scanner/
 ├── app/
 │   ├── agents/
-│   │   ├── relevance_agent.py
-│   │   ├── summarizer_agent.py
-│   │   ├── reviewer_agent.py
-│   │   └── rag_answer_agent.py
-│   │
 │   ├── data/
-│   │   ├── arxiv_client.py
-│   │   ├── storage.py
-│   │   ├── vector_store.py
-│   │   ├── pdf_ingestor.py
-│   │   ├── text_chunker.py
-│   │   ├── trend_analysis.py
-│   │   └── topic_clustering.py
-│   │
 │   ├── workflows/
-│   │   ├── research_graph.py
-│   │   └── report_generator.py
-│   │
 │   ├── dashboard/
-│   │   └── streamlit_app.py
-│   │
 │   ├── notifications/
-│   │   ├── email_digest.py
-│   │   └── slack_digest.py
-│   │
 │   ├── evaluation/
-│   │   └── rag_evaluator.py
-│   │
 │   └── utils.py
+│
+├── k8s/
+│   ├── namespace.yaml
+│   ├── configmap.yaml
+│   ├── app-deployment.yaml
+│   ├── scheduler-deployment.yaml
+│   ├── ollama-deployment.yaml
+│   ├── chroma-deployment.yaml
+│   └── pvc.yaml
 │
 ├── chroma_db/
 ├── data/
-│   ├── pdfs/
-│   ├── parsed/
-│   └── papers.db
-│
 ├── reports/
 ├── tests/
 ├── .github/workflows/tests.yml
@@ -240,34 +231,9 @@ pip install -r requirements.txt
 
 # 🦙 Ollama Setup
 
-Install Ollama:
-
-```text
-https://ollama.com
-```
-
-Pull lightweight model:
-
 ```bash
 ollama pull llama3.2:1b
-```
-
-Start Ollama:
-
-```bash
 ollama serve
-```
-
-Test model:
-
-```bash
-ollama run llama3.2:1b
-```
-
-Recommended lightweight model:
-
-```text
-llama3.2:1b
 ```
 
 ---
@@ -306,14 +272,7 @@ The RAG system supports:
 - Retrieved chunk display
 - Local embeddings
 - ChromaDB vector search
-
-Example questions:
-
-```text
-What are the major trends in agentic AI?
-Which papers are relevant to quant trading?
-What implementation ideas can I get from these papers?
-```
+- ChromaDB HTTP server mode for Docker/Kubernetes
 
 ---
 
@@ -360,8 +319,6 @@ Evaluates:
 
 # ⏰ Autonomous Scheduler
 
-Run scheduler:
-
 ```bash
 python scheduler.py
 ```
@@ -379,35 +336,90 @@ Features:
 
 # 🐳 Docker Deployment
 
-Run the dashboard with Docker:
-
 ```bash
 docker compose up --build
 ```
 
-Open:
-
-```text
-http://localhost:8501
-```
-
-Run the workflow inside Docker:
+Run workflow inside Docker:
 
 ```bash
 docker compose exec agentic-arxiv-app python main.py
 ```
 
-Run the scheduler inside Docker:
+Run scheduler inside Docker:
 
 ```bash
-docker compose exec agentic-arxiv-app python scheduler.py
+docker compose exec agentic-arxiv-scheduler python scheduler.py
 ```
 
-Docker persists:
+Docker services:
 
-- `reports/`
-- `data/`
-- `chroma_db/`
+```text
+agentic-arxiv-app        Streamlit dashboard
+agentic-arxiv-scheduler  autonomous scheduler
+agentic-arxiv-ollama     local LLM server
+agentic-arxiv-chroma     vector DB server
+```
+
+---
+
+# ☸️ Kubernetes Deployment
+
+Create namespace:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+```
+
+Create ConfigMap:
+
+```bash
+kubectl apply -f k8s/configmap.yaml
+```
+
+Create Kubernetes secrets from `.env`:
+
+```bash
+kubectl create secret generic agentic-arxiv-secrets \
+  --from-env-file=.env \
+  -n agentic-arxiv
+```
+
+Deploy ChromaDB:
+
+```bash
+kubectl apply -f k8s/chroma-deployment.yaml
+```
+
+Deploy Ollama:
+
+```bash
+kubectl apply -f k8s/ollama-deployment.yaml
+```
+
+Pull Ollama model inside Kubernetes:
+
+```bash
+kubectl exec -it deployment/ollama -n agentic-arxiv -- ollama pull llama3.2:1b
+```
+
+Deploy Streamlit app:
+
+```bash
+kubectl apply -f k8s/app-deployment.yaml
+```
+
+Port-forward dashboard:
+
+```bash
+kubectl port-forward svc/agentic-arxiv-app 8501:8501 -n agentic-arxiv
+```
+
+Run workflow inside Kubernetes:
+
+```bash
+kubectl exec -it deployment/agentic-arxiv-app -n agentic-arxiv -- python main.py
+```
 
 ---
 
@@ -417,13 +429,6 @@ Supported providers:
 
 - Yahoo
 - Gmail
-
-Configured via:
-
-```yaml
-email:
-  enabled: true
-```
 
 Secrets stored securely in:
 
@@ -437,13 +442,6 @@ EMAIL_PASSWORD=...
 
 Uses Slack Incoming Webhooks.
 
-Configured via:
-
-```yaml
-slack:
-  enabled: true
-```
-
 Webhook stored securely in:
 
 ```env
@@ -454,19 +452,15 @@ SLACK_WEBHOOK_URL=...
 
 # 🔐 Secret Management
 
-Sensitive credentials are stored in:
+Sensitive credentials are stored in `.env` and should never be committed.
 
-```text
-.env
+Kubernetes secrets are created from `.env` using:
+
+```bash
+kubectl create secret generic agentic-arxiv-secrets \
+  --from-env-file=.env \
+  -n agentic-arxiv
 ```
-
-Never commit secrets to GitHub.
-
-Protected secrets include:
-
-- email passwords
-- Slack webhooks
-- future API keys
 
 ---
 
@@ -479,8 +473,21 @@ pytest -v
 Current status:
 
 ```text
-15 passed
+26 passed
 ```
+
+Test coverage includes:
+
+- relevance scoring
+- report generation
+- RAG evaluator
+- text chunking
+- trend analysis
+- reviewer agent
+- topic clustering
+- Docker files
+- Kubernetes manifests
+- config safety
 
 ---
 
@@ -514,6 +521,7 @@ This project demonstrates:
 - AI workflow observability
 - Autonomous scheduling
 - Dockerized AI deployment
+- Kubernetes orchestration
 - Containerized GenAI systems
 - Research intelligence systems
 - AI + Quant Finance integration
@@ -729,16 +737,44 @@ This project demonstrates:
 - Step 27C: Add Trend Analysis Tests
 - Step 27D: Add Reviewer Agent Tests
 - Step 27E: Add Topic Clustering Tests
-- Step 27F: Run Full Test Suite
-- Step 27G: Confirm `15 passed`
+- Step 27F: Add Docker File Tests
+- Step 27G: Add Kubernetes Manifest Tests
+- Step 27H: Add Config Safety Tests
+- Step 27I: Run Full Test Suite
+- Step 27J: Confirm `26 passed`
+
+#### Step 28: Add Multi-Container Docker Architecture
+
+- Step 28A: Add Dashboard Container
+- Step 28B: Add Scheduler Container
+- Step 28C: Add Ollama Container
+- Step 28D: Add ChromaDB Container
+- Step 28E: Add Shared Volumes
+- Step 28F: Add Container Environment Variables
+
+#### Step 29: Add Kubernetes Deployment
+
+- Step 29A: Enable Kubernetes in Docker Desktop
+- Step 29B: Add Kubernetes Namespace
+- Step 29C: Add Kubernetes ConfigMap
+- Step 29D: Create Kubernetes Secrets from `.env`
+- Step 29E: Deploy ChromaDB Service
+- Step 29F: Deploy Ollama Service
+- Step 29G: Pull Ollama Model in Kubernetes
+- Step 29H: Deploy Streamlit App Service
+- Step 29I: Add Port Forwarding
+- Step 29J: Run Workflow Inside Kubernetes
+- Step 29K: Validate Kubernetes Dashboard Flow
 
 ---
 
 # 🔮 Future Improvements
 
-- Multi-container Docker architecture
-- Separate scheduler container
-- Ollama container integration
+- Cloud Kubernetes deployment
+- Helm chart packaging
+- CI/CD deployment pipeline
+- Persistent production storage classes
+- GPU-backed Ollama deployment
 - Streamlit Cloud deployment
 - Multi-agent reviewer collaboration
 - Trend evolution over time
