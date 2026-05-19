@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agentic-arxiv-config
+  namespace: agentic-arxiv
+data:
+  config.yaml: |
+    project:
+      name: agentic-arxiv-research-scanner
+
+    arxiv:
+      categories:
+        - cs.AI
+        - cs.LG
+        - cs.CL
+        - q-fin.TR
+        - q-fin.ST
+      max_results: 5
+      sort_by: submittedDate
+
+    interests:
+      keywords:
+        - agentic ai
+        - rag
+        - retrieval augmented generation
+        - large language models
+        - llm
+        - machine learning
+        - deep learning
+        - reinforcement learning
+        - quant finance
+        - trading
+        - market microstructure
+        - alpha
+        - forecasting
+
+    llm:
+      use_ollama: true
+      model: llama3.2:1b
+
+    pdf:
+      ingest_full_text: true
+      max_pdfs: 2
+      chunk_size: 1000
+      chunk_overlap: 150
+
+    scheduler:
+      enabled: true
+      run_time: "09:00"
+
+    email:
+      enabled: true
+      smtp_server: "smtp.mail.yahoo.com"
+      smtp_port: 587
+      sender_email: "tastethetea007@yahoo.com"
+      recipient_email: "tastethetea007@yahoo.com"
+      subject_prefix: "Daily arXiv Research Brief"
+
+    slack:
+      enabled: true

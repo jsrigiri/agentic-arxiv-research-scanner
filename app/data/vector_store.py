@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-import chromadb
+import chromadb, os
 from sentence_transformers import SentenceTransformer
 
 from app.data.text_chunker import build_paper_chunks
@@ -12,9 +12,19 @@ embedding_model = SentenceTransformer(
     "all-MiniLM-L6-v2"
 )
 
-client = chromadb.PersistentClient(
-    path="chroma_db"
-)
+CHROMA_HOST = os.getenv("CHROMA_HOST")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
+
+if CHROMA_HOST:
+    client = chromadb.HttpClient(
+        host=CHROMA_HOST,
+        port=CHROMA_PORT,
+    )
+else:
+    client = chromadb.PersistentClient(
+        path="chroma_db"
+    )
+
 
 collection = client.get_or_create_collection(
     name=COLLECTION_NAME

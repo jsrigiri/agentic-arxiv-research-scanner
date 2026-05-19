@@ -48,12 +48,20 @@ def generate_embeddings(
 def reduce_dimensions(
     embeddings: np.ndarray
 ):
+    n_samples = embeddings.shape[0]
+
+    n_neighbors = min(
+        5,
+        max(2, n_samples - 1),
+    )
 
     reducer = umap.UMAP(
-        n_neighbors=5,
+        n_neighbors=n_neighbors,
+        n_components=2,
         min_dist=0.1,
         metric="cosine",
         random_state=42,
+        init="random",
     )
 
     reduced = reducer.fit_transform(
@@ -82,10 +90,18 @@ def cluster_embeddings(
 def run_topic_clustering(
     df: pd.DataFrame
 ):
+    if df.empty or len(df) < 4:
+        return None
 
     documents = build_documents(df)
 
-    if len(documents) < 2:
+    documents = [
+        doc.strip()
+        for doc in documents
+        if doc and doc.strip()
+    ]
+
+    if len(documents) < 4:
         return None
 
     embeddings = generate_embeddings(
@@ -100,10 +116,9 @@ def run_topic_clustering(
         reduced_embeddings
     )
 
-    clustered_df = df.copy()
+    clustered_df = df.copy().iloc[: len(documents)]
 
     clustered_df["cluster"] = labels
-
     clustered_df["umap_x"] = reduced_embeddings[:, 0]
     clustered_df["umap_y"] = reduced_embeddings[:, 1]
 

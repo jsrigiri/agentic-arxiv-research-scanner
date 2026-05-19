@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   agentic-arxiv-app:
@@ -12,12 +10,78 @@ services:
     env_file:
       - .env
 
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+
     volumes:
       - ./reports:/app/reports
       - ./data:/app/data
-      - ./chroma_db:/app/chroma_db
-
-    restart: unless-stopped
 
     command: >
       streamlit run app/dashboard/streamlit_app.py
+
+    restart: unless-stopped
+
+    depends_on:
+      - ollama
+      - chroma
+
+
+  agentic-arxiv-scheduler:
+    build: .
+    container_name: agentic-arxiv-scheduler
+
+    env_file:
+      - .env
+
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+
+    volumes:
+      - ./reports:/app/reports
+      - ./data:/app/data
+
+    command: >
+      python scheduler.py
+
+    restart: unless-stopped
+
+    depends_on:
+      - ollama
+      - chroma
+      - agentic-arxiv-app
+
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agentic-arxiv-ollama
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+    restart: unless-stopped
+
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: agentic-arxiv-chroma
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - chroma_data:/data
+
+    restart: unless-stopped
+
+
+volumes:
+  ollama_data:
+  chroma_data:

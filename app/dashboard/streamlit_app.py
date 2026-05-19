@@ -26,13 +26,12 @@ from app.data.topic_clustering import run_topic_clustering
 from app.evaluation.rag_evaluator import evaluate_rag_response
 
 from app.data.storage import (
+    DB_PATH,
     initialize_database,
     initialize_trend_tables,
     fetch_trend_history,
 )
 
-
-DB_PATH = "papers.db"
 
 
 @st.cache_data

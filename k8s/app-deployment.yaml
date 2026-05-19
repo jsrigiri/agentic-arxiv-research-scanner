@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentic-arxiv-app
+  namespace: agentic-arxiv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentic-arxiv-app
+  template:
+    metadata:
+      labels:
+        app: agentic-arxiv-app
+    spec:
+      containers:
+        - name: app
+          image: agentic-arxiv-research-scanner-agentic-arxiv-app:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8501
+
+          env:
+            - name: OLLAMA_HOST
+              value: "http://ollama:11434"
+            - name: CHROMA_HOST
+              value: "chromadb"
+            - name: CHROMA_PORT
+              value: "8000"
+
+          envFrom:
+            - secretRef:
+                name: agentic-arxiv-secrets
+
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+            - name: app-data
+              mountPath: /app/data
+            - name: app-reports
+              mountPath: /app/reports
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: agentic-arxiv-config
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: app-data-pvc
+        - name: app-reports
+          persistentVolumeClaim:
+            claimName: app-reports-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentic-arxiv-app
+  namespace: agentic-arxiv
+spec:
+  selector:
+    app: agentic-arxiv-app
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
+  type: NodePort
